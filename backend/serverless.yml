@@ -1,0 +1,52 @@
+service: oraculo-ai-backend
+
+useDotenv: true
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+  - serverless-deployment-bucket
+  - serverless-prune-plugin
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: sa-east-1
+  deploymentBucket:
+    name: oraculo-ai-backend-deploy-${opt:region, self:provider.region}
+  environment:
+    STAGE: ${env:STAGE}
+    PRISMA_BINARY_TARGET: ${env:PRISMA_BINARY_TARGET}
+    DATABASE_URL: ${env:DATABASE_URL}
+
+functions:
+  main:
+    handler: dist/src/serverless.handler
+    events:
+      - http:
+          path: '/'
+          method: ANY
+          cors: true
+      - http:
+          path: '{proxy+}'
+          method: ANY
+          cors: true
+
+package:
+  patterns:
+    - '!**/**'
+    - 'dist/**'
+    - 'node_modules/**'
+    - '!node_modules/prisma'
+    - '!node_modules/@prisma/engines'
+    - '!node_modules/typescript'
+    - '!node_modules/aws-sdk/**'
+
+custom:
+  prune:
+    automatic: true
+    number: 1
+  deploymentBucket:
+    blockPublicAccess: true
+  serverless-offline:
+    httpPort: 3333
