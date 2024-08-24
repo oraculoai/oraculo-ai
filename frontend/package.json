@@ -9,6 +9,9 @@
   },
   "author": "Paulo Salvatore <paulo@salvatore.academy>",
   "dependencies": {
+    "@tanstack/react-query": "^5.52.1",
+    "@tanstack/react-query-devtools": "^5.52.1",
+    "@tanstack/react-query-next-experimental": "^5.52.1",
     "next": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
