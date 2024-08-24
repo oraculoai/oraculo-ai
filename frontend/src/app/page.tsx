@@ -212,7 +212,7 @@ export default function IndexPage() {
 
             <button
               type="submit"
-              className="bg-gray-300 rounded-lg px-8 py-2 h-full"
+              className="bg-gray-200 rounded-lg px-8 py-2 h-full"
             >
               Enviar
             </button>
