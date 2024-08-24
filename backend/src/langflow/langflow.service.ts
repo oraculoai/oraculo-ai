@@ -28,4 +28,32 @@ export class LangflowService {
 
     return response.data;
   }
+
+  private readonly documentQaFlowId = 'bd8e657d-5bf7-4056-be47-44bf0066e3b9';
+
+  async documentQa(input: string, filePath: string): Promise<any> {
+    const response = await axios.post(
+      this.LANGFLOW_API_URL + '/run/' + this.documentQaFlowId,
+      {
+        input_value: input,
+        output_type: 'chat',
+        input_type: 'chat',
+        tweaks: {
+          'Prompt-gLKoS': {},
+          'ChatInput-K8PGB': {},
+          'ChatOutput-UTNCZ': {},
+          'OpenAIModel-5z85e': {},
+          'ParseData-8BgqK': {},
+          'File-EQjD8': {
+            path: filePath,
+          },
+        },
+      },
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+
+    return response.data;
+  }
 }

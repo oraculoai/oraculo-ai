@@ -4,6 +4,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { AxiosResponse } from 'axios';
 import { MessageDto } from '@/ai/model/message.dto';
 import { MessageDomain } from '@/ai/model/message.domain';
+import { DocumentQaDto } from '@/ai/model/document-qa.dto';
 
 export const AI_PATH = '/ai';
 
@@ -20,5 +21,10 @@ export class AIController {
   @Post('/message')
   postHelloWorld(@Body() dto: MessageDto): Promise<MessageDomain> {
     return this.aiService.createMessage(dto);
+  }
+
+  @Post('/document-qa')
+  documentQa(@Body() dto: DocumentQaDto): Promise<MessageDomain> {
+    return this.aiService.documentQa(dto);
   }
 }
