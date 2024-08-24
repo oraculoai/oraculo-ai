@@ -7,10 +7,10 @@ const rewrites = () => {
         source: '/assets/:path*',
         destination: '/assets/:path*',
       },
-      {
-        source: '/:path*',
-        destination: `${apiUrl}/landing-page/:path*`,
-      },
+      // {
+      //   source: '/:path*',
+      //   destination: `${apiUrl}/landing-page/:path*`,
+      // },
     ],
   };
 };
