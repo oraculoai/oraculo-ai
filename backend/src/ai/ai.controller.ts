@@ -10,8 +10,8 @@ export const AI_PATH = '/ai';
 export class AIController {
   constructor(private readonly aiService: AIService) {}
 
-  @Get('/upload-files')
-  uploadFiles(): Promise<AxiosResponse<any>> {
-    return this.aiService.uploadFiles();
+  @Get('/hello-world')
+  helloWorld(): Promise<AxiosResponse<any>> {
+    return this.aiService.helloWorld();
   }
 }

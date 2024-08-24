@@ -5,7 +5,7 @@ import { LangflowService } from '@/langflow/langflow.service';
 export class AIService {
   constructor(private readonly langflowService: LangflowService) {}
 
-  uploadFiles() {
-    return this.langflowService.uploadFiles();
+  helloWorld() {
+    return this.langflowService.runFlow1();
   }
 }

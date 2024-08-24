@@ -7,7 +7,7 @@ export class LangflowService {
 
   private readonly flow1 = 'bce6184d-cad5-49ec-abd2-345773ef6670';
 
-  async uploadFiles(): Promise<AxiosResponse<any>> {
+  async runFlow1(): Promise<AxiosResponse<any>> {
     const response = await axios.post(
       this.LANGFLOW_API_URL + '/run/' + this.flow1,
       {
