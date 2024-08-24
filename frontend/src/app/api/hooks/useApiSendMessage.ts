@@ -3,11 +3,11 @@ import {
   UseMutationOptions,
   UseMutationResult,
 } from '@tanstack/react-query';
-import { DocumentQaDto } from '@/src/app/_model/document-qa.dto';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { MessageDomain } from '@/src/app/_model/message.domain';
 import { ApiConstants } from '@/src/app/api/api.constants';
 import { MessageDto } from '@/src/app/_model/message.dto';
+import api from '@/src/app/api/api';
 
 export default function useApiSendMessage(
   options: UseMutationOptions<MessageDomain, AxiosError, MessageDto>,
@@ -15,7 +15,7 @@ export default function useApiSendMessage(
   return useMutation({
     ...options,
     mutationFn: async (dto: MessageDto) => {
-      const response = await axios.post<MessageDomain>(
+      const response = await api.post<MessageDomain>(
         ApiConstants.endpoints.ai.post.sendMessage(),
         dto,
       );
