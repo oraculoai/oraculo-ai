@@ -7,19 +7,19 @@ import { MessageDomain } from '@/ai/model/message.domain';
 export class AIService {
   constructor(private readonly langflowService: LangflowService) {}
 
-  helloWorld() {
-    return this.langflowService.runFlow1('hello-world');
+  helloWorld(): Promise<any> {
+    return this.langflowService.runMemoryChatBot('hello-world');
   }
 
-  async createMessage(dto: MessageDto) {
-    const flowResult = await this.langflowService.runFlow1(dto.text);
+  async createMessage(dto: MessageDto): Promise<MessageDomain> {
+    const flowResult = await this.langflowService.runMemoryChatBot(dto.text);
 
-    const messageDomain: MessageDomain = {
-      id: String(Math.floor(Math.random())),
+    const id = String(Math.floor(Math.random()));
+
+    return {
+      id,
       from: 'agent',
       text: flowResult.outputs[0].outputs[0].messages[0].message,
     };
-
-    return messageDomain;
   }
 }
