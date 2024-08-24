@@ -5,7 +5,11 @@ import { useMutation } from '@tanstack/react-query';
 import axios, { AxiosResponse } from 'axios';
 import Bubble from '@/src/app/components/Bubble/Bubble';
 import { scrollToBottom } from '@/src/app/helpers/scroll.helper';
+import { MessageDomain } from '@/src/app/_model/message.domain';
+import { MessageDto } from '@/src/app/_model/message.dto';
+import { DocumentQaDto } from '@/src/app/_model/document-qa.dto';
 
+/////// Message
 interface Message {
   id?: string;
   from: 'agent' | 'user';
@@ -13,15 +17,9 @@ interface Message {
   status: 'sending' | 'sent';
 }
 
-interface MessageDto {
-  text: string;
-}
+///////
 
-interface MessageDomain {
-  id: string;
-  from: 'agent' | 'user';
-  text: string;
-}
+/////// Messages
 
 const initialMessages: Message[] = [
   /*{
@@ -119,7 +117,8 @@ const initialMessages: Message[] = [
 export default function IndexPage() {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
-  const [userMessage, setUserMessage] = useState('');
+  const [userMessage, setUserMessage] = useState<string>('');
+  const [filePath, setFilePath] = useState<string>('');
 
   const formRef = React.useRef<HTMLFormElement>(null);
   const chatRef = React.useRef<HTMLDivElement>(null);
@@ -128,11 +127,36 @@ export default function IndexPage() {
     scrollToBottom(chatRef.current);
   }, [messages]);
 
-  const mutation = useMutation({
+  const sendMessageMutation = useMutation({
     mutationFn: (messageDto: MessageDto) => {
       return axios.post<MessageDomain>(
         'http://localhost:3333/ai/message',
         messageDto,
+      );
+    },
+    onSuccess: (response: AxiosResponse<MessageDomain>) => {
+      const data = response.data;
+
+      const newMessage: Message = {
+        id: data.id,
+        from: data.from,
+        text: data.text,
+        status: 'sent',
+      };
+
+      const messagesWithoutTemporary = messages.filter(
+        (message) => message.id !== 'temporary-id',
+      );
+
+      setMessages([...messagesWithoutTemporary, newMessage]);
+    },
+  });
+
+  const sendDocumentQaMutation = useMutation({
+    mutationFn: (documentQaDto: DocumentQaDto) => {
+      return axios.post<MessageDomain>(
+        'http://localhost:3333/ai/document-qa',
+        documentQaDto,
       );
     },
     onSuccess: (response: AxiosResponse<MessageDomain>) => {
@@ -167,10 +191,22 @@ export default function IndexPage() {
       status: 'sending',
     };
 
-    setMessages([...messages, tempMessage]);
+    const agentMessage: Message = {
+      id: 'temporary-id',
+      from: 'agent',
+      text: '*Waiting...*',
+      status: 'sending',
+    };
 
-    const messageDto: MessageDto = { text: message };
-    mutation.mutate(messageDto);
+    setMessages([...messages, tempMessage, agentMessage]);
+
+    if (filePath) {
+      const documentQaDto: DocumentQaDto = { question: message, filePath };
+      sendDocumentQaMutation.mutate(documentQaDto);
+    } else {
+      const messageDto: MessageDto = { text: message };
+      sendMessageMutation.mutate(messageDto);
+    }
 
     setUserMessage('');
   }
@@ -179,7 +215,7 @@ export default function IndexPage() {
     <>
       <div className="flex justify-center h-screen fixed p-4 w-full">
         <div className="flex flex-col justify-between w-full border">
-          {/* Bolhas de texto */}
+          {/* Message History */}
           <div className="space-y-4 overflow-auto p-4" ref={chatRef}>
             {messages.map((message, index) => (
               <Bubble key={index} from={message.from}>
@@ -188,33 +224,45 @@ export default function IndexPage() {
             ))}
           </div>
 
-          {/* Caixa de input de texto */}
+          {/* User Input Form */}
           <form
             onSubmit={onSubmit}
             ref={formRef}
             className="flex items-center space-x-2 p-4 border-t-2 border-gray-300"
           >
-            <textarea
-              id="userMessage"
-              name="userMessage"
-              placeholder="Digite sua mensagem"
-              className="border rounded-lg p-2 w-full h-32 max-h-96"
-              value={userMessage}
-              onChange={(event) => setUserMessage(event.currentTarget.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  formRef.current?.requestSubmit();
-                  return;
-                }
-              }}
-            />
+            <div className="flex w-full flex-col gap-2">
+              <input
+                id="filePath"
+                name="filePath"
+                type="string"
+                className="border rounded-lg p-2 w-full"
+                value={filePath}
+                onChange={(event) => setFilePath(event.currentTarget.value)}
+                placeholder="Insert file path (e.g: /path/to/file.pdf)"
+              />
+
+              <textarea
+                id="userMessage"
+                name="userMessage"
+                placeholder="Message*"
+                className="border rounded-lg p-2 w-full h-32 max-h-96"
+                value={userMessage}
+                onChange={(event) => setUserMessage(event.currentTarget.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    formRef.current?.requestSubmit();
+                    return;
+                  }
+                }}
+              />
+            </div>
 
             <button
               type="submit"
               className="bg-gray-200 rounded-lg px-8 py-2 h-full"
             >
-              Enviar
+              Send
             </button>
           </form>
         </div>
