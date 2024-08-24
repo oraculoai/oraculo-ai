@@ -4,9 +4,13 @@ import { ProxyModule } from './proxy/proxy.module';
 import { AIModule } from '@/ai/ai.module';
 import { LandingPageModule } from '@/landing-page/landing-page.module';
 import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from '@/prisma/prisma.module';
 
 @Module({
   imports: [
+    // Prisma
+    PrismaModule,
+
     // Proxy
     ProxyModule,
 

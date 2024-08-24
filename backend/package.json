@@ -24,7 +24,10 @@
     "serverless:start": "nest build && serverless offline start",
     "serverless:deploy:production": "nest build && cross-env NODE_ENV=production serverless deploy --stage production --verbose",
     "serverless:deploy:staging": "nest build && cross-env NODE_ENV=staging serverless deploy --stage staging --verbose",
-    "serverless:deploy:development": "nest build && cross-env NODE_ENV=development serverless deploy --stage development --verbose"
+    "serverless:deploy:development": "nest build && cross-env NODE_ENV=development serverless deploy --stage development --verbose",
+    "prisma:generate": "npx prisma generate",
+    "prisma:db-push": "npx prisma db push",
+    "prisma:studio": "npx prisma studio"
   },
   "dependencies": {
     "@codegenie/serverless-express": "^4.13.0",
@@ -34,6 +37,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.1.8",
+    "@prisma/client": "^5.18.0",
     "@vendia/serverless-express": "^4.10.4",
     "aws-lambda": "^1.0.7",
     "axios": "^1.4.0",
@@ -64,6 +68,7 @@
     "jest": "^29.5.0",
     "lint-staged": "^15.2.9",
     "prettier": "^3.0.0",
+    "prisma": "^5.18.0",
     "serverless-deployment-bucket": "^1.6.0",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "13.3.3",
