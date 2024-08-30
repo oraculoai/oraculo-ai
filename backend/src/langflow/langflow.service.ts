@@ -11,6 +11,7 @@ export class LangflowService {
     const response = await axios.post(
       this.LANGFLOW_API_URL + '/run/' + this.memoryChatBot,
       {
+        session_id: 'session1',
         input_value: input,
         output_type: 'chat',
         input_type: 'chat',

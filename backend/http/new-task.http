@@ -1,0 +1,6 @@
+POST http://localhost:3333/ai-workforce/task
+Content-Type: application/json
+
+{
+  "description": "Task 1 description"
+}

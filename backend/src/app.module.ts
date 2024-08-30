@@ -5,6 +5,7 @@ import { AIModule } from '@/ai/ai.module';
 import { LandingPageModule } from '@/landing-page/landing-page.module';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '@/prisma/prisma.module';
+import { AiWorkforceModule } from './ai-workforce/ai-workforce.module';
 
 @Module({
   imports: [
@@ -22,6 +23,8 @@ import { PrismaModule } from '@/prisma/prisma.module';
 
     // Config
     ConfigModule.forRoot(),
+
+    AiWorkforceModule,
   ],
   controllers: [AppController],
 })
