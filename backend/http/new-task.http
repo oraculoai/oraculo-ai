@@ -2,5 +2,5 @@ POST http://localhost:3333/ai-workforce/task
 Content-Type: application/json
 
 {
-  "description": "Task 1 description"
+  "description": "Quero criar um post no meu blog para demonstrar o potencial de sistemas multi agentes como forças de trabalho virtuais, aplicados para a área de marketing digital, demonstrando (com links) determinadas dores do setor e como essa solução se relaciona com isso."
 }

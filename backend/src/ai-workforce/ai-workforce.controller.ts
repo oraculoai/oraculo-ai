@@ -18,7 +18,7 @@ export class AiWorkforceController {
   }
 
   @Patch('/process-task/:id')
-  processTask(@Param('id') id: string): TaskDomain {
+  processTask(@Param('id') id: string): Promise<TaskDomain> {
     return this.aiWorkforceService.processTask(id);
   }
 }
