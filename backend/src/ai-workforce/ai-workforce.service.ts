@@ -12,7 +12,7 @@ import axios from 'axios';
 export class AiWorkforceService {
   private readonly tasks: TaskDomain[] = [];
 
-  private getTaskById(id: string) {
+  private getTaskById(id: string): TaskDomain {
     return this.tasks.find((task) => task.id === id);
   }
 

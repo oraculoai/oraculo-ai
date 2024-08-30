@@ -4,6 +4,6 @@ import { AiWorkforceService } from './ai-workforce.service';
 
 @Module({
   controllers: [AiWorkforceController],
-  providers: [AiWorkforceService]
+  providers: [AiWorkforceService],
 })
 export class AiWorkforceModule {}
