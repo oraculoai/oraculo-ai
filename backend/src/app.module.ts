@@ -6,6 +6,7 @@ import { LandingPageModule } from '@/landing-page/landing-page.module';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { AiWorkforceModule } from './ai-workforce/ai-workforce.module';
+import { LangGraphModule } from './langgraph/langgraph.module';
 
 @Module({
   imports: [
@@ -25,6 +26,8 @@ import { AiWorkforceModule } from './ai-workforce/ai-workforce.module';
     ConfigModule.forRoot(),
 
     AiWorkforceModule,
+
+    LangGraphModule,
   ],
   controllers: [AppController],
 })
