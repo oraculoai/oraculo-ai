@@ -16,6 +16,7 @@ const agentChiefMarketingOfficer = {
 const digitalMarketingManager = {
   name: 'Digital Marketing Manager',
 };
+
 const contentMarketingSpecialist = {
   name: 'Content Marketing Specialist',
 };
