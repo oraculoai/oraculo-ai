@@ -5,6 +5,10 @@ export class CreateRequestDto {
   @IsNotEmpty()
   apiKey: string;
 
+  @IsString()
+  @IsNotEmpty()
+  agentSlug: string;
+
   @IsNotEmpty()
   @IsJSON()
   inputData: any;

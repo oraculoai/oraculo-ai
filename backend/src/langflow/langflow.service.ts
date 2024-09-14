@@ -8,8 +8,8 @@ export class LangflowService {
       const response = await axios.post(
         `${process.env.LANGFLOW_API_URL}/run/${flowId}`,
         {
-          session_id: inputData.session_id || 'default-session',
-          input_value: inputData.input_value,
+          session_id: Math.random().toString(36).substring(7),
+          input_value: JSON.stringify(inputData),
           output_type: 'chat',
           input_type: 'chat',
         },

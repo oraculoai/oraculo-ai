@@ -8,13 +8,9 @@ import { RequestStatus } from '@prisma/client';
 export class RequestService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createRequest(
-    createRequestDto: CreateRequestDto,
-  ): Promise<RequestDomain> {
-    const { apiKey, inputData } = createRequestDto;
-
+  async createRequest(dto: CreateRequestDto): Promise<RequestDomain> {
     const userApiKey = await this.prisma.userApiKey.findUnique({
-      where: { apiKey },
+      where: { apiKey: dto.apiKey },
     });
 
     if (!userApiKey) {
@@ -23,15 +19,17 @@ export class RequestService {
 
     const request = await this.prisma.request.create({
       data: {
-        apiKey,
+        apiKey: dto.apiKey,
         userId: userApiKey.userId,
-        inputData,
+        agentSlug: dto.agentSlug,
+        inputData: dto.inputData,
         status: 'pending',
       },
     });
 
     return {
       id: request.id,
+      agentSlug: request.agentSlug,
       inputData: request.inputData,
       status: request.status,
     };
@@ -42,10 +40,13 @@ export class RequestService {
       where: { id: requestId },
     });
 
-    if (!request) return null;
+    if (!request) {
+      return null;
+    }
 
     return {
       id: request.id,
+      agentSlug: request.agentSlug,
       inputData: request.inputData,
       status: request.status,
       processingStartedAt: request.processingStartedAt,

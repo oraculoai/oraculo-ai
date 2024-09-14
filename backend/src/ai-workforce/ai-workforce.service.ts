@@ -22,18 +22,18 @@ export class AiWorkforceService {
 
     await this.requestService.updateRequestStatus(requestId, 'processing');
 
-    const { slug, inputData } = request.inputData;
+    const agentSlug = request.agentSlug;
 
-    const flowConfig = await this.getFlowConfigBySlug(slug);
+    const flowConfig = await this.getFlowConfigBySlug(agentSlug);
 
     if (!flowConfig) {
-      this.logger.error(`Flow config for slug ${slug} not found`);
-      throw new Error(`Flow config for slug ${slug} not found`);
+      this.logger.error(`Flow config for slug ${agentSlug} not found`);
+      throw new Error(`Flow config for slug ${agentSlug} not found`);
     }
 
     const generatedArtifact = await this.runLangflowAgent(
       flowConfig.flowId,
-      inputData,
+      request.inputData,
     );
 
     const artifact = await this.prisma.artifact.create({

@@ -38,6 +38,7 @@ model Request {
   id                  String        @id @default(auto()) @map("_id") @db.ObjectId
   apiKey              String        @db.String
   userId              String        @db.ObjectId
+  agentSlug           String
   inputData           Json
   status              RequestStatus
   result              Json?
