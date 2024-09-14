@@ -44,6 +44,19 @@ model Request {
   result              Json?
   processingStartedAt DateTime?
   updatedAt           DateTime      @updatedAt
+  artifact            Artifact?     @relation(fields: [artifactId], references: [id])
+  artifactId          String?       @db.ObjectId
 
   @@map("requests")
+}
+
+model Artifact {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  requestId   String    @unique @db.ObjectId
+  generatedBy String
+  content     Json
+  updatedAt   DateTime  @updatedAt
+  requests    Request[]
+
+  @@map("artifacts")
 }

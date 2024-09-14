@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AddCreditsDto } from './dto/add-credits.dto';
@@ -13,19 +13,16 @@ export class UserService {
   async createUser(createUserDto: CreateUserDto): Promise<UserDomain> {
     const { name, email } = createUserDto;
 
-    // Criar o usuário no Prisma
     const user = await this.prisma.user.create({
       data: {
         name,
         email,
-        credits: 100, // Valor inicial de créditos
+        credits: 10,
       },
     });
 
-    // Gerar chave de API única
     const apiKey = uuidv4();
 
-    // Associar a chave ao usuário
     await this.prisma.userApiKey.create({
       data: {
         apiKey,
@@ -41,28 +38,8 @@ export class UserService {
     };
   }
 
-  async findUserByEmail(email: string): Promise<UserDomain | null> {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      return null;
-    }
-
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      credits: user.credits,
-    };
-  }
-
-  async addCredits(
-    apiKey: string,
-    addCreditsDto: AddCreditsDto,
-  ): Promise<UserDomain> {
-    const { credits } = addCreditsDto;
+  async addCredits(addCreditsDto: AddCreditsDto): Promise<UserDomain> {
+    const { apiKey, credits } = addCreditsDto;
 
     // Encontrar o usuário pela chave de API
     const userApiKey = await this.prisma.userApiKey.findUnique({
@@ -71,7 +48,7 @@ export class UserService {
     });
 
     if (!userApiKey) {
-      throw new Error('API key inválida');
+      throw new HttpException('Invalid API key', HttpStatus.UNAUTHORIZED);
     }
 
     // Atualizar créditos do usuário

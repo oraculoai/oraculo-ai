@@ -10,8 +10,10 @@ import {
 import { RequestService } from './request.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { RequestDomain } from './domain/request.domain';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('requests')
+@ApiTags('requests')
 export class RequestController {
   constructor(private readonly requestService: RequestService) {}
 
@@ -22,10 +24,7 @@ export class RequestController {
     try {
       return await this.requestService.createRequest(createRequestDto);
     } catch (error) {
-      throw new HttpException(
-        'Erro ao criar requisição',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Error creating request', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -35,12 +34,17 @@ export class RequestController {
   ): Promise<RequestDomain> {
     const requestStatus = await this.requestService.getRequestStatus(requestId);
     if (!requestStatus) {
-      throw new HttpException(
-        'Requisição não encontrada',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
     }
     return requestStatus;
   }
-  Ø;
+
+  @Post('start-process/:requestId')
+  async startProcess(@Param('requestId') requestId: string): Promise<void> {
+    try {
+      await this.requestService.startProcess(requestId);
+    } catch (error) {
+      throw new HttpException('Error starting process', HttpStatus.BAD_REQUEST);
+    }
+  }
 }

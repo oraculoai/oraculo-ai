@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -10,8 +12,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { AddCreditsDto } from './dto/add-credits.dto';
 import { UserDomain } from './domain/user.domain';
 import { UserApiKeyDomain } from './domain/user-api-key.domain';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('users')
+@ApiTags('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -20,34 +24,33 @@ export class UserController {
     try {
       return this.userService.createUser(createUserDto);
     } catch (error) {
-      throw new HttpException('Erro ao criar usuário', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Error creating user', HttpStatus.BAD_REQUEST);
     }
   }
 
-  @Post('api-key')
+  @Get('api-key/:email')
   async getApiKey(
-    @Body('email') email: string,
+    @Param('email') email: string,
   ): Promise<{ apiKey: UserApiKeyDomain['apiKey'] } | null> {
     const apiKey = await this.userService.getUserApiKey(email);
 
     if (!apiKey) {
-      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     return apiKey;
   }
 
   @Post('credits/add')
-  addCredits(
-    @Body('apiKey') apiKey: string,
-    @Body() addCreditsDto: AddCreditsDto,
-  ): Promise<UserDomain> {
+  addCredits(@Body() addCreditsDto: AddCreditsDto): Promise<UserDomain> {
     try {
-      return this.userService.addCredits(apiKey, addCreditsDto);
+      return this.userService.addCredits(addCreditsDto);
     } catch (error) {
       throw new HttpException(
-        'Erro ao adicionar créditos',
-        HttpStatus.BAD_REQUEST,
+        'Error adding credits',
+        error instanceof HttpException
+          ? error.getStatus()
+          : HttpStatus.BAD_REQUEST,
       );
     }
   }
