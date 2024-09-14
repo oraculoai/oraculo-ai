@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { AiWorkforceModule } from './ai-workforce/ai-workforce.module';
 import { UserModule } from './user/user.module';
+import { RequestModule } from './request/request.module';
 
 @Module({
   imports: [
@@ -28,6 +29,8 @@ import { UserModule } from './user/user.module';
     AiWorkforceModule,
 
     UserModule,
+
+    RequestModule,
   ],
   controllers: [AppController],
 })
