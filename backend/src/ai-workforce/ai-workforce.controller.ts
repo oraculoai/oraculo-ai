@@ -1,10 +1,8 @@
 import {
-  Body,
   Controller,
   Get,
   HttpException,
   HttpStatus,
-  Logger,
   Param,
   Post,
 } from '@nestjs/common';
@@ -15,36 +13,17 @@ import { ApiTags } from '@nestjs/swagger';
 @Controller('ai-workforce')
 @ApiTags('ai-workforce')
 export class AiWorkforceController {
-  private readonly logger = new Logger(AiWorkforceController.name);
-
   constructor(
     private readonly aiWorkforceService: AiWorkforceService,
     private readonly prisma: PrismaService,
   ) {}
 
-  @Post('generate-artifact')
-  async generateArtifact(
-    @Body() requestData: any,
-  ): Promise<{ requestId: string }> {
+  @Post('start-process/:requestId')
+  async startProcess(@Param('requestId') requestId: string): Promise<void> {
     try {
-      const newRequest = await this.prisma.request.create({
-        data: {
-          apiKey: requestData.apiKey,
-          userId: requestData.userId,
-          inputData: requestData,
-          status: 'pending',
-        },
-      });
-
-      this.aiWorkforceService.processRequest(newRequest.id);
-
-      this.logger.log(
-        `Request ${newRequest.id} created and processing started.`,
-      );
-      return { requestId: newRequest.id };
-    } catch (error: any) {
-      this.logger.error(`Error creating request: ${error.message}`);
-      throw new HttpException('Error creating request', HttpStatus.BAD_REQUEST);
+      await this.aiWorkforceService.startProcess(requestId);
+    } catch (error) {
+      throw new HttpException('Error starting process', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -53,10 +32,6 @@ export class AiWorkforceController {
     try {
       return this.aiWorkforceService.getArtifact(requestId);
     } catch (error: any) {
-      this.logger.error(
-        `Error retrieving artifact for request ${requestId}: ${error.message}`,
-      );
-
       throw new HttpException(
         'Error retrieving artifact',
         HttpStatus.NOT_FOUND,
@@ -85,10 +60,6 @@ export class AiWorkforceController {
       if (error instanceof HttpException) {
         throw error;
       }
-
-      this.logger.error(
-        `Error retrieving status for request ${requestId}: ${error.message}`,
-      );
 
       throw new HttpException(
         'Error retrieving request status',

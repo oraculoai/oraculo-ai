@@ -1,7 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { RequestDomain } from './domain/request.domain';
+import { RequestStatus } from '@prisma/client';
 
 @Injectable()
 export class RequestService {
@@ -14,23 +15,11 @@ export class RequestService {
 
     const userApiKey = await this.prisma.userApiKey.findUnique({
       where: { apiKey },
-      include: { user: true },
     });
 
     if (!userApiKey) {
-      throw new HttpException('Invalid API key', HttpStatus.UNAUTHORIZED);
+      throw new BadRequestException('Invalid API key');
     }
-
-    // Check credit
-    if (userApiKey.user.credits < 1) {
-      throw new HttpException('Insufficient credits', HttpStatus.FORBIDDEN);
-    }
-
-    // Decrement credit
-    await this.prisma.user.update({
-      where: { id: userApiKey.userId },
-      data: { credits: { decrement: 1 } },
-    });
 
     const request = await this.prisma.request.create({
       data: {
@@ -53,9 +42,7 @@ export class RequestService {
       where: { id: requestId },
     });
 
-    if (!request) {
-      return null;
-    }
+    if (!request) return null;
 
     return {
       id: request.id,
@@ -66,10 +53,32 @@ export class RequestService {
     };
   }
 
-  async startProcess(requestId: string): Promise<void> {
+  async updateRequestStatus(
+    requestId: string,
+    status: RequestStatus,
+  ): Promise<void> {
     await this.prisma.request.update({
       where: { id: requestId },
-      data: { status: 'processing', processingStartedAt: new Date() },
+      data: { status },
+    });
+  }
+
+  async completeRequestWithArtifact(
+    requestId: string,
+    artifactId: string,
+  ): Promise<void> {
+    await this.prisma.request.update({
+      where: { id: requestId },
+      data: {
+        status: 'completed',
+        artifactId,
+      },
+    });
+  }
+
+  async getRequestById(requestId: string): Promise<RequestDomain | null> {
+    return this.prisma.request.findUnique({
+      where: { id: requestId },
     });
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { LangflowService } from '@/langflow/langflow.service';
+import { RequestService } from '@/request/request.service';
 
 @Injectable()
 export class AiWorkforceService {
@@ -9,43 +10,71 @@ export class AiWorkforceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly langflowService: LangflowService,
+    private readonly requestService: RequestService,
   ) {}
 
-  async processRequest(requestId: string): Promise<void> {
-    const request = await this.prisma.request.findUnique({
-      where: { id: requestId },
-    });
+  async startProcess(requestId: string): Promise<void> {
+    const request = await this.requestService.getRequestById(requestId);
 
     if (!request) {
-      this.logger.error(`Request ${requestId} not found`);
-      return;
+      throw new Error(`Request ${requestId} not found`);
     }
 
-    await this.prisma.request.update({
-      where: { id: requestId },
-      data: { status: 'processing', processingStartedAt: new Date() },
-    });
+    await this.requestService.updateRequestStatus(requestId, 'processing');
 
-    const generatedArtifact = await this.runLangflowAgent(request.inputData);
+    const { slug, inputData } = request.inputData;
+
+    const flowConfig = await this.getFlowConfigBySlug(slug);
+
+    if (!flowConfig) {
+      this.logger.error(`Flow config for slug ${slug} not found`);
+      throw new Error(`Flow config for slug ${slug} not found`);
+    }
+
+    const generatedArtifact = await this.runLangflowAgent(
+      flowConfig.flowId,
+      inputData,
+    );
 
     const artifact = await this.prisma.artifact.create({
       data: {
-        requestId: request.id,
+        requestId: requestId,
         generatedBy: 'Langflow',
         content: generatedArtifact,
       },
     });
 
-    await this.prisma.request.update({
-      where: { id: request.id },
-      data: { status: 'completed', artifactId: artifact.id },
-    });
+    await this.requestService.completeRequestWithArtifact(
+      requestId,
+      artifact.id,
+    );
 
     this.logger.log(`Request ${requestId} processed successfully.`);
   }
 
-  private runLangflowAgent(inputData: any): Promise<any> {
-    return this.langflowService.runMemoryChatBot(inputData);
+  private async getFlowConfigBySlug(
+    slug: string,
+  ): Promise<{ flowId: string; parameters: any } | null> {
+    const flowConfigMap = {
+      'blog-post': {
+        flowId: process.env.LANGFLOW_BLOG_FLOW_ID,
+        parameters: {
+          /* params específicos do blog post */
+        },
+      },
+      'memory-chatbot': {
+        flowId: process.env.LANGFLOW_MEMORY_CHATBOT_FLOW_ID,
+        parameters: {
+          /* params específicos do report */
+        },
+      },
+    };
+
+    return flowConfigMap[slug] || null;
+  }
+
+  private async runLangflowAgent(flowId: string, inputData: any): Promise<any> {
+    return this.langflowService.runFlow(flowId, inputData);
   }
 
   async getArtifact(requestId: string): Promise<any> {

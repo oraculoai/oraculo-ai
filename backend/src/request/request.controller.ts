@@ -38,13 +38,4 @@ export class RequestController {
     }
     return requestStatus;
   }
-
-  @Post('start-process/:requestId')
-  async startProcess(@Param('requestId') requestId: string): Promise<void> {
-    try {
-      await this.requestService.startProcess(requestId);
-    } catch (error) {
-      throw new HttpException('Error starting process', HttpStatus.BAD_REQUEST);
-    }
-  }
 }
