@@ -9,6 +9,7 @@ import {
 import { AiWorkforceService } from './ai-workforce.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ApiTags } from '@nestjs/swagger';
+import { ArtifactDomain } from '@/ai-workforce/domain/artifact.domain';
 
 @Controller('ai-workforce')
 @ApiTags('ai-workforce')
@@ -19,16 +20,18 @@ export class AiWorkforceController {
   ) {}
 
   @Post('start-process/:requestId')
-  async startProcess(@Param('requestId') requestId: string): Promise<void> {
+  async startProcess(
+    @Param('requestId') requestId: string,
+  ): Promise<ArtifactDomain> {
     try {
-      await this.aiWorkforceService.startProcess(requestId);
+      return this.aiWorkforceService.startProcess(requestId);
     } catch (error) {
       throw new HttpException('Error starting process', HttpStatus.BAD_REQUEST);
     }
   }
 
   @Get('artifact/:requestId')
-  getArtifact(@Param('requestId') requestId: string): Promise<any> {
+  getArtifact(@Param('requestId') requestId: string): Promise<ArtifactDomain> {
     try {
       return this.aiWorkforceService.getArtifact(requestId);
     } catch (error: any) {
