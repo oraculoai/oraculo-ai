@@ -44,7 +44,7 @@ export class UserService {
         },
       });
 
-      // Check if the user is on waitlist
+      // Remove if the user is on waitlist
       await this.getWaitlistService.remove(email).catch((e) => {
         Logger.error('Error removing user from waitlist', e, UserService.name);
       });
@@ -65,7 +65,6 @@ export class UserService {
   async addCredits(addCreditsDto: AddCreditsDto): Promise<UserDomain> {
     const { apiKey, credits } = addCreditsDto;
 
-    // Encontrar o usuário pela chave de API
     const userApiKey = await this.prisma.userApiKey.findUnique({
       where: { apiKey },
       include: { user: true },
@@ -75,7 +74,6 @@ export class UserService {
       throw new HttpException('Invalid API key', HttpStatus.UNAUTHORIZED);
     }
 
-    // Atualizar créditos do usuário
     const updatedUser = await this.prisma.user.update({
       where: { id: userApiKey.userId },
       data: {
@@ -94,7 +92,6 @@ export class UserService {
   async getUserApiKey(
     email: string,
   ): Promise<{ apiKey: UserApiKeyDomain['apiKey'] } | null> {
-    // Encontrar usuário por email
     const user = await this.prisma.user.findUnique({
       where: { email },
       include: { apiKeys: true },
