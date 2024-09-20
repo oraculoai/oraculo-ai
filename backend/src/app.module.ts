@@ -8,6 +8,7 @@ import { AiWorkforceModule } from '@/ai-workforce/ai-workforce.module';
 import { UserModule } from '@/user/user.module';
 import { RequestModule } from '@/request/request.module';
 import { GetWaitlistModule } from '@/integration/get-waitlist/get-waitlist.module';
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
@@ -27,6 +28,9 @@ import { GetWaitlistModule } from '@/integration/get-waitlist/get-waitlist.modul
 
     // Integrations
     GetWaitlistModule,
+
+    // Mailer
+    MailerModule,
 
     // Config
     ConfigModule.forRoot(),
