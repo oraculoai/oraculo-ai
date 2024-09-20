@@ -58,3 +58,11 @@ model Artifact {
 
   @@map("artifacts")
 }
+
+model Waitlist {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  email     String  @unique
+  isRemoved Boolean @default(false)
+
+  @@map("waitlist")
+}
