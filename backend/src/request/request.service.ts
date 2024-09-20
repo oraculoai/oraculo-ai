@@ -72,7 +72,7 @@ export class RequestService {
       where: { id: requestId },
       data: {
         status: 'completed',
-        artifactId,
+        artifact: { connect: { id: artifactId } },
       },
     });
   }
