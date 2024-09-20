@@ -10,6 +10,7 @@ import { AiWorkforceService } from './ai-workforce.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ApiTags } from '@nestjs/swagger';
 import { ArtifactDomain } from '@/ai-workforce/domain/artifact.domain';
+import { RequestStatusDomain } from '@/request/domain/request-status.domain';
 
 @Controller('ai-workforce')
 @ApiTags('ai-workforce')
@@ -43,10 +44,19 @@ export class AiWorkforceController {
   }
 
   @Get('status/:requestId')
-  async getRequestStatus(@Param('requestId') requestId: string): Promise<any> {
+  async getRequestStatus(
+    @Param('requestId') requestId: string,
+  ): Promise<RequestStatusDomain> {
     try {
       const request = await this.prisma.request.findUnique({
         where: { id: requestId },
+        select: {
+          id: true,
+          agentSlug: true,
+          status: true,
+          processingStartedAt: true,
+          artifact: { select: { id: true } },
+        },
       });
 
       if (!request) {
@@ -54,10 +64,11 @@ export class AiWorkforceController {
       }
 
       return {
-        requestId: request.id,
+        id: request.id,
+        agentSlug: request.agentSlug,
         status: request.status,
         processingStartedAt: request.processingStartedAt,
-        artifactId: request.artifactId || null,
+        artifactId: request.artifact?.id ?? null,
       };
     } catch (error: any) {
       if (error instanceof HttpException) {
