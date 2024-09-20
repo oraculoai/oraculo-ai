@@ -13,6 +13,7 @@ import { UserApiKeyDomain } from './domain/user-api-key.domain';
 import { v4 as uuidv4 } from 'uuid';
 import { GetWaitlistService } from '@/integration/get-waitlist/get-waitlist.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { MailerService } from '@/mailer/mailer.service';
 
 const INITIAL_CREDITS = 1;
 
@@ -21,32 +22,59 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly getWaitlistService: GetWaitlistService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserDomain> {
     try {
+      // Create User and API Key
       const { name, email } = createUserDto;
-
+      const apiKey = uuidv4();
       const user = await this.prisma.user.create({
         data: {
           name,
           email,
           credits: INITIAL_CREDITS,
-        },
-      });
-
-      const apiKey = uuidv4();
-
-      await this.prisma.userApiKey.create({
-        data: {
-          apiKey,
-          userId: user.id,
+          apiKeys: {
+            create: { apiKey },
+          },
         },
       });
 
       // Remove if the user is on waitlist
       await this.getWaitlistService.remove(email).catch((e) => {
         Logger.error('Error removing user from waitlist', e, UserService.name);
+      });
+
+      // Send email
+      const message = `
+        <p>
+          Hi ${name},
+        </p>
+        <p>
+          Welcome to OraculoAI! We are excited to have you on board.
+        </p>
+        <p>
+          Your API key is: <strong>${apiKey}</strong>
+        </p>
+        <p>
+          You have been credited with ${INITIAL_CREDITS} free credits to get started.
+        </p>
+        <p>
+          If you have any questions, feel free to reach out to us at
+          <a href="mailto:oraculoai.bot@gmail.com">oraculoai.bot@gmail.com</a>.
+        </p>
+        <p>
+          Best,
+          <br />
+          OraculoAI Team
+        </p>
+      `;
+      await this.mailerService.sendEmail({
+        recipients: [{ name, email }],
+        subject: 'Welcome to OraculoAI!',
+        html: message,
+        text: message,
       });
 
       return {

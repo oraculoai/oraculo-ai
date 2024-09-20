@@ -18,6 +18,10 @@ export class MailerService {
         email: 'MS_Bh9c8t@trial-7dnvo4dpd3345r86.mlsender.net',
         name: 'Oraculo AI',
       })
+      .setReplyTo({
+        email: 'oraculoai.bot@gmail.com',
+        name: 'Oraculo AI',
+      })
       .setTo(recipients)
       .setSubject(dto.subject)
       .setHtml(dto.html)

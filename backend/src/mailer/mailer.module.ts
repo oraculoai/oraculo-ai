@@ -3,7 +3,8 @@ import { MailerService } from './mailer.service';
 import { MailerController } from './mailer.controller';
 
 @Module({
-  providers: [MailerService],
   controllers: [MailerController],
+  providers: [MailerService],
+  exports: [MailerService],
 })
 export class MailerModule {}
