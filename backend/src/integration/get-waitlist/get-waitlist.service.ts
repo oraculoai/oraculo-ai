@@ -40,4 +40,11 @@ export class GetWaitlistService {
       });
     }
   }
+
+  remove(email: string): Promise<WaitlistDomain> {
+    return this.prisma.waitlist.update({
+      where: { email },
+      data: { isRemoved: true },
+    });
+  }
 }

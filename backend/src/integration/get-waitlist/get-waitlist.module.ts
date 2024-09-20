@@ -5,5 +5,6 @@ import { GetWaitlistController } from './get-waitlist.controller';
 @Module({
   controllers: [GetWaitlistController],
   providers: [GetWaitlistService],
+  exports: [GetWaitlistService],
 })
 export class GetWaitlistModule {}

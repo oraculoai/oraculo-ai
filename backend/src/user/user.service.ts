@@ -1,41 +1,65 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AddCreditsDto } from './dto/add-credits.dto';
 import { UserDomain } from './domain/user.domain';
 import { UserApiKeyDomain } from './domain/user-api-key.domain';
 import { v4 as uuidv4 } from 'uuid';
+import { GetWaitlistService } from '@/integration/get-waitlist/get-waitlist.service';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+
+const INITIAL_CREDITS = 1;
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly getWaitlistService: GetWaitlistService,
+  ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserDomain> {
-    const { name, email } = createUserDto;
+    try {
+      const { name, email } = createUserDto;
 
-    const user = await this.prisma.user.create({
-      data: {
-        name,
-        email,
-        credits: 10,
-      },
-    });
+      const user = await this.prisma.user.create({
+        data: {
+          name,
+          email,
+          credits: INITIAL_CREDITS,
+        },
+      });
 
-    const apiKey = uuidv4();
+      const apiKey = uuidv4();
 
-    await this.prisma.userApiKey.create({
-      data: {
-        apiKey,
-        userId: user.id,
-      },
-    });
+      await this.prisma.userApiKey.create({
+        data: {
+          apiKey,
+          userId: user.id,
+        },
+      });
 
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      credits: user.credits,
-    };
+      // Check if the user is on waitlist
+      await this.getWaitlistService.remove(email).catch((e) => {
+        Logger.error('Error removing user from waitlist', e, UserService.name);
+      });
+
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        credits: user.credits,
+      };
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
+        throw new BadRequestException('User already exists');
+      }
+    }
   }
 
   async addCredits(addCreditsDto: AddCreditsDto): Promise<UserDomain> {
