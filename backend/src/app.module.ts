@@ -7,7 +7,7 @@ import { PrismaModule } from '@/prisma/prisma.module';
 import { AiWorkforceModule } from '@/ai-workforce/ai-workforce.module';
 import { UserModule } from '@/user/user.module';
 import { RequestModule } from '@/request/request.module';
-import { GetWaitlistModule } from '@/integration/get-waitlist/get-waitlist.module';
+import { WaitlistModule } from '@/waitlist/waitlist.module';
 import { MailerModule } from './mailer/mailer.module';
 
 @Module({
@@ -26,8 +26,8 @@ import { MailerModule } from './mailer/mailer.module';
     UserModule,
     RequestModule,
 
-    // Integrations
-    GetWaitlistModule,
+    // Waitlist
+    WaitlistModule,
 
     // Mailer
     MailerModule,

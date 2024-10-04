@@ -11,9 +11,9 @@ import { AddCreditsDto } from './dto/add-credits.dto';
 import { UserDomain } from './domain/user.domain';
 import { UserApiKeyDomain } from './domain/user-api-key.domain';
 import { v4 as uuidv4 } from 'uuid';
-import { GetWaitlistService } from '@/integration/get-waitlist/get-waitlist.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { MailerService } from '@/mailer/mailer.service';
+import { WaitlistService } from '@/waitlist/waitlist.service';
 
 const INITIAL_CREDITS = 1;
 
@@ -21,8 +21,8 @@ const INITIAL_CREDITS = 1;
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly getWaitlistService: GetWaitlistService,
     private readonly mailerService: MailerService,
+    private readonly waitlistService: WaitlistService,
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserDomain> {
@@ -42,7 +42,7 @@ export class UserService {
       });
 
       // Remove if the user is on waitlist
-      await this.getWaitlistService.remove(email).catch((e) => {
+      await this.waitlistService.remove(email).catch((e) => {
         Logger.error('Error removing user from waitlist', e, UserService.name);
       });
 
@@ -130,7 +130,7 @@ export class UserService {
     }
 
     return {
-      apiKey: user.apiKeys[0].apiKey,
+      apiKey: user.apiKeys[0]?.apiKey,
     };
   }
 }
