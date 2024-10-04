@@ -27,6 +27,10 @@ export class MailerService {
       .setHtml(dto.html)
       .setText(dto.text);
 
-    await mailerSend.email.send(emailParams);
+    const emailResponse = await mailerSend.email.send(emailParams);
+
+    if (emailResponse.statusCode !== 202) {
+      throw new Error('Failed to send email');
+    }
   }
 }
