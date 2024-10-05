@@ -14,8 +14,8 @@ import { UserDomain } from './domain/user.domain';
 import { UserApiKeyDomain } from './domain/user-api-key.domain';
 import { ApiTags } from '@nestjs/swagger';
 
-@Controller('users')
-@ApiTags('users')
+@Controller('user')
+@ApiTags('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
