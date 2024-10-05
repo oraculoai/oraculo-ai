@@ -28,6 +28,19 @@ export class UserController {
     }
   }
 
+  @Get(':apiKey')
+  async getUserByApiKey(
+    @Param('apiKey') apiKey: string,
+  ): Promise<UserDomain | null> {
+    const user = await this.userService.getUserByApiKey(apiKey);
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return user;
+  }
+
   @Get('api-key/:email')
   async getApiKey(
     @Param('email') email: string,

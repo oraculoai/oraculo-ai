@@ -131,4 +131,24 @@ export class UserService {
       apiKey: user.apiKeys[0]?.apiKey,
     };
   }
+
+  async getUserByApiKey(apiKey: string): Promise<UserDomain> {
+    const userApiKey = await this.prisma.userApiKey.findUnique({
+      where: { apiKey },
+      include: { user: true },
+    });
+
+    if (!userApiKey) {
+      return null;
+    }
+
+    const user = userApiKey.user;
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      credits: user.credits,
+    };
+  }
 }
