@@ -24,8 +24,8 @@ export class MailerService {
       })
       .setTo(recipients)
       .setSubject(dto.subject)
-      .setHtml(dto.html)
-      .setText(dto.text);
+      .setHtml(dto.message)
+      .setText(dto.message);
 
     const emailResponse = await mailerSend.email.send(emailParams);
 

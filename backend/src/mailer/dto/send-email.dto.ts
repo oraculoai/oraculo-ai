@@ -18,8 +18,5 @@ export class SendEmailDto {
   subject: string;
 
   @IsString()
-  html: string;
-
-  @IsString()
-  text: string;
+  message: string;
 }

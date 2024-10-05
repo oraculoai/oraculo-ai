@@ -46,8 +46,11 @@ export class UserService {
         Logger.error('Error removing user from waitlist', e, UserService.name);
       });
 
-      // Send email
-      const message = `
+      // Send email to user
+      await this.mailerService.sendEmail({
+        recipients: [{ name, email }],
+        subject: 'Welcome to OraculoAI!',
+        message: `
         <p>
           Hi ${name},
         </p>
@@ -69,12 +72,7 @@ export class UserService {
           <br />
           OraculoAI Team
         </p>
-      `;
-      await this.mailerService.sendEmail({
-        recipients: [{ name, email }],
-        subject: 'Welcome to OraculoAI!',
-        html: message,
-        text: message,
+      `,
       });
 
       return {
