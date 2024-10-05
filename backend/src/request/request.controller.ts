@@ -12,20 +12,14 @@ import { CreateRequestDto } from './dto/create-request.dto';
 import { RequestDomain } from './domain/request.domain';
 import { ApiTags } from '@nestjs/swagger';
 
-@Controller('requests')
-@ApiTags('requests')
+@Controller('request')
+@ApiTags('request')
 export class RequestController {
   constructor(private readonly requestService: RequestService) {}
 
   @Post('create')
-  async createRequest(
-    @Body() createRequestDto: CreateRequestDto,
-  ): Promise<RequestDomain> {
-    try {
-      return await this.requestService.createRequest(createRequestDto);
-    } catch (error) {
-      throw new HttpException('Error creating request', HttpStatus.BAD_REQUEST);
-    }
+  async createRequest(@Body() dto: CreateRequestDto): Promise<RequestDomain> {
+    return this.requestService.createRequest(dto);
   }
 
   @Get('status/:requestId')
