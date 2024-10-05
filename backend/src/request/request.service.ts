@@ -17,6 +17,7 @@ export class RequestService {
       throw new BadRequestException('Invalid API key');
     }
 
+    // Create Request
     const request = await this.prisma.request.create({
       data: {
         apiKey: dto.apiKey,
@@ -25,6 +26,12 @@ export class RequestService {
         inputData: dto.inputData,
         status: 'pending',
       },
+    });
+
+    // Consume User Credit
+    await this.prisma.user.update({
+      where: { id: userApiKey.userId },
+      data: { credits: { decrement: 1 } },
     });
 
     return {
