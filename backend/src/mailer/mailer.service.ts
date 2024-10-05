@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { SendEmailDto } from '@/mailer/dto/send-email.dto';
 import { EmailParams, MailerSend, Recipient } from 'mailersend';
+import { APIResponse } from 'mailersend/lib/services/request.service';
 
 @Injectable()
 export class MailerService {
-  async sendEmail(dto: SendEmailDto): Promise<void> {
+  async sendEmail(dto: SendEmailDto): Promise<APIResponse> {
     const mailerSend = new MailerSend({
       apiKey: process.env.MAILERSEND_API_KEY,
     });
@@ -32,5 +33,7 @@ export class MailerService {
     if (emailResponse.statusCode !== 202) {
       throw new Error('Failed to send email');
     }
+
+    return emailResponse;
   }
 }
