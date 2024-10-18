@@ -1,4 +1,4 @@
-import { IsJSON, IsNotEmpty, IsString } from 'class-validator';
+import { IsJSON, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateRequestDto {
@@ -19,12 +19,12 @@ export class CreateRequestDto {
   agentSlug: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty({
     example: 'session-id',
     description: 'Session ID',
   })
-  sessionId: string;
+  sessionId?: string;
 
   @IsNotEmpty()
   @IsJSON()

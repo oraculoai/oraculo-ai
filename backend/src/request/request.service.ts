@@ -23,7 +23,7 @@ export class RequestService {
         apiKey: dto.apiKey,
         userId: userApiKey.userId,
         agentSlug: dto.agentSlug,
-        sessionId: dto.sessionId,
+        sessionId: dto.sessionId || Math.random().toString(36).substring(7),
         inputData: dto.inputData,
         status: 'pending',
       },
