@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { LangflowService } from '@/langflow/langflow.service';
 import { RequestService } from '@/request/request.service';
@@ -18,63 +18,61 @@ export class AiWorkforceService {
     const request = await this.requestService.getRequestById(requestId);
 
     if (!request) {
-      throw new Error(`Request ${requestId} not found`);
+      throw new NotFoundException(`Request ${requestId} not found`);
     }
 
-    await this.requestService.updateRequestStatus(requestId, 'processing');
+    try {
+      await this.requestService.updateRequestStatus(requestId, 'processing');
+      this.logger.log(`Processing request ${requestId}`);
 
-    const flowConfig = await this.getFlowConfigBySlug(request.agentSlug);
+      const generatedArtifact = await this.runLangflowAgent(
+        request.agentSlug,
+        request.inputData,
+        request.sessionId,
+      );
 
-    if (!flowConfig) {
-      this.logger.error(`Flow config for slug ${request.agentSlug} not found`);
-      throw new Error(`Flow config for slug ${request.agentSlug} not found`);
+      this.logger.log(`Generated artifact for request ${requestId}`);
+
+      const content =
+        generatedArtifact['outputs']?.[0]?.['outputs']?.[0]?.['results']?.[
+          'message'
+        ]?.['text'];
+
+      const artifact = await this.prisma.artifact.create({
+        data: {
+          requestId: requestId,
+          generatedBy: request.agentSlug,
+          content,
+        },
+      });
+
+      await this.requestService.completeRequestWithArtifact(
+        requestId,
+        artifact.id,
+      );
+
+      this.logger.log(`Request ${requestId} processed successfully.`);
+
+      return artifact;
+    } catch (e) {
+      this.logger.error(`Error processing request ${requestId}`, e);
+
+      // Update request status to failed
+      await this.requestService.updateRequestStatus(requestId, 'failed');
+
+      // Refund user credit
+      await this.requestService.updateUserCredit(request.userId, 1);
+
+      throw e;
     }
-
-    const generatedArtifact = await this.runLangflowAgent(
-      flowConfig.flowId,
-      request.inputData,
-    );
-
-    const content =
-      generatedArtifact['outputs']?.[0]?.['outputs']?.[0]?.['results']?.[
-        'message'
-      ]?.['text'];
-
-    const artifact = await this.prisma.artifact.create({
-      data: {
-        requestId: requestId,
-        generatedBy: request.agentSlug,
-        content,
-      },
-    });
-
-    await this.requestService.completeRequestWithArtifact(
-      requestId,
-      artifact.id,
-    );
-
-    this.logger.log(`Request ${requestId} processed successfully.`);
-
-    return artifact;
   }
 
-  private async getFlowConfigBySlug(
-    slug: string,
-  ): Promise<{ flowId: string } | null> {
-    const flowConfigMap = {
-      'blog-post': {
-        flowId: process.env.LANGFLOW_BLOG_FLOW_ID,
-      },
-      'memory-chatbot': {
-        flowId: process.env.LANGFLOW_MEMORY_CHATBOT_FLOW_ID,
-      },
-    };
-
-    return flowConfigMap[slug] || null;
-  }
-
-  private async runLangflowAgent(flowId: string, inputData: any): Promise<any> {
-    return this.langflowService.runFlow(flowId, inputData);
+  private async runLangflowAgent(
+    flowIdOrSlug: string,
+    inputData: any,
+    sessionId?: string,
+  ): Promise<any> {
+    return this.langflowService.runFlow(flowIdOrSlug, inputData, sessionId);
   }
 
   async getArtifact(requestId: string): Promise<any> {
@@ -83,9 +81,21 @@ export class AiWorkforceService {
     });
 
     if (!artifact) {
-      throw new Error(`Artifact not found for request ${requestId}`);
+      throw new NotFoundException(
+        `Artifact not found for request ${requestId}`,
+      );
     }
 
     return artifact;
+  }
+
+  async startProcessPending(): Promise<ArtifactDomain> {
+    const pendingRequest = await this.requestService.getPendingRequest();
+
+    if (!pendingRequest) {
+      throw new NotFoundException('No pending request found');
+    }
+
+    return this.startProcess(pendingRequest.id);
   }
 }

@@ -23,23 +23,29 @@ export class RequestService {
         apiKey: dto.apiKey,
         userId: userApiKey.userId,
         agentSlug: dto.agentSlug,
+        sessionId: dto.sessionId,
         inputData: dto.inputData,
         status: 'pending',
       },
     });
 
-    // Consume User Credit
-    await this.prisma.user.update({
-      where: { id: userApiKey.userId },
-      data: { credits: { decrement: 1 } },
-    });
+    await this.updateUserCredit(userApiKey.userId, -1);
 
     return {
       id: request.id,
+      userId: request.userId,
       agentSlug: request.agentSlug,
+      sessionId: request.sessionId,
       inputData: request.inputData,
       status: request.status,
     };
+  }
+
+  async updateUserCredit(userId: string, number: number): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { credits: { increment: number } },
+    });
   }
 
   async getRequestStatus(requestId: string): Promise<RequestDomain | null> {
@@ -53,7 +59,9 @@ export class RequestService {
 
     return {
       id: request.id,
+      userId: request.userId,
       agentSlug: request.agentSlug,
+      sessionId: request.sessionId,
       inputData: request.inputData,
       status: request.status,
       processingStartedAt: request.processingStartedAt,
@@ -87,6 +95,22 @@ export class RequestService {
   async getRequestById(requestId: string): Promise<RequestDomain | null> {
     return this.prisma.request.findUnique({
       where: { id: requestId },
+      select: {
+        id: true,
+        userId: true,
+        agentSlug: true,
+        sessionId: true,
+        inputData: true,
+        status: true,
+        processingStartedAt: true,
+        result: true,
+      },
+    });
+  }
+
+  getPendingRequest(): Promise<RequestDomain | null> {
+    return this.prisma.request.findFirst({
+      where: { status: 'pending' },
     });
   }
 }

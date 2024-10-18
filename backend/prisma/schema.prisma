@@ -39,6 +39,7 @@ model Request {
   apiKey              String        @db.String
   userId              String        @db.ObjectId
   agentSlug           String
+  sessionId           String
   inputData           Json
   status              RequestStatus
   result              Json?

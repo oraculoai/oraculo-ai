@@ -3,12 +3,16 @@ import axios from 'axios';
 
 @Injectable()
 export class LangflowService {
-  async runFlow(flowId: string, inputData: any): Promise<any> {
+  async runFlow(
+    flowIdOrSlug: string,
+    inputData: any,
+    sessionId?: string,
+  ): Promise<any> {
     try {
       const response = await axios.post(
-        `${process.env.LANGFLOW_API_URL}/run/${flowId}`,
+        `${process.env.LANGFLOW_API_URL}/run/${flowIdOrSlug}`,
         {
-          session_id: Math.random().toString(36).substring(7),
+          session_id: sessionId,
           input_value: JSON.stringify(inputData),
           output_type: 'chat',
           input_type: 'chat',

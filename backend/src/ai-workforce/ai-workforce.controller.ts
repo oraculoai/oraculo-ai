@@ -20,6 +20,11 @@ export class AiWorkforceController {
     private readonly prisma: PrismaService,
   ) {}
 
+  @Post('start-process/pending')
+  async startProcessPending(): Promise<ArtifactDomain> {
+    return this.aiWorkforceService.startProcessPending();
+  }
+
   @Post('start-process/:requestId')
   async startProcess(
     @Param('requestId') requestId: string,
