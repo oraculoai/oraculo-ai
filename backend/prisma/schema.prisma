@@ -39,9 +39,11 @@ model Request {
   apiKey              String        @db.String
   userId              String        @db.ObjectId
   agentSlug           String
+  agent               Agent         @relation(fields: [agentSlug], references: [slug])
   sessionId           String
   inputData           Json
   status              RequestStatus
+  failureReason       String?
   result              Json?
   processingStartedAt DateTime?
   artifact            Artifact?
@@ -63,7 +65,21 @@ model Artifact {
 model Waitlist {
   id        String  @id @default(auto()) @map("_id") @db.ObjectId
   email     String  @unique
+  agentSlug String
+  agent     Agent?  @relation(fields: [agentSlug], references: [slug])
   isRemoved Boolean @default(false)
 
+  @@unique([email, agentSlug])
   @@map("waitlist")
+}
+
+model Agent {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  slug      String     @unique
+  name      String
+  updatedAt DateTime   @updatedAt
+  requests  Request[]
+  waitlists Waitlist[]
+
+  @@map("agents")
 }

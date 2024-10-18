@@ -16,9 +16,7 @@ export class WaitlistService {
 
   async joinWaitlist(dto: JoinWaitlistDto): Promise<WaitlistDomain> {
     try {
-      const data: Prisma.WaitlistCreateInput = {
-        ...dto,
-      };
+      const data: Prisma.WaitlistCreateInput = { ...dto };
 
       await this.prisma.waitlist.create({
         data,

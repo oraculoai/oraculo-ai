@@ -72,10 +72,11 @@ export class RequestService {
   async updateRequestStatus(
     requestId: string,
     status: RequestStatus,
+    failureReason?: string,
   ): Promise<void> {
     await this.prisma.request.update({
       where: { id: requestId },
-      data: { status },
+      data: { status, failureReason },
     });
   }
 

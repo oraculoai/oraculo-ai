@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import axios from 'axios';
 
 @Injectable()
@@ -21,9 +21,12 @@ export class LangflowService {
           headers: { 'Content-Type': 'application/json' },
         },
       );
+
       return response.data || { message: 'No response from Langflow' };
     } catch (error: any) {
-      throw new Error(`Langflow processing failed: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Langflow processing failed: ${error.message}`,
+      );
     }
   }
 }

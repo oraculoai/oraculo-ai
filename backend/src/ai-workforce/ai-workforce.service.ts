@@ -58,7 +58,11 @@ export class AiWorkforceService {
       this.logger.error(`Error processing request ${requestId}`, e);
 
       // Update request status to failed
-      await this.requestService.updateRequestStatus(requestId, 'failed');
+      await this.requestService.updateRequestStatus(
+        requestId,
+        'failed',
+        e['message'] || 'Unknown error',
+      );
 
       // Refund user credit
       await this.requestService.updateUserCredit(request.userId, 1);
