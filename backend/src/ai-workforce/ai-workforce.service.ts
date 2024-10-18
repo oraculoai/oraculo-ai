@@ -3,6 +3,8 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { LangflowService } from '@/langflow/langflow.service';
 import { RequestService } from '@/request/request.service';
 import { ArtifactDomain } from '@/ai-workforce/domain/artifact.domain';
+import { MailerService } from '@/mailer/mailer.service';
+import { UserService } from '@/user/user.service';
 
 @Injectable()
 export class AiWorkforceService {
@@ -12,6 +14,8 @@ export class AiWorkforceService {
     private readonly prisma: PrismaService,
     private readonly langflowService: LangflowService,
     private readonly requestService: RequestService,
+    private readonly mailerService: MailerService,
+    private readonly userService: UserService,
   ) {}
 
   async startProcess(requestId: string): Promise<ArtifactDomain> {
@@ -52,6 +56,27 @@ export class AiWorkforceService {
       );
 
       this.logger.log(`Request ${requestId} processed successfully.`);
+
+      // Send artifact to email
+      const user = await this.userService.getUserById(request.userId);
+      await this.mailerService.sendEmail({
+        recipients: [{ email: user.email, name: user.name }],
+        subject: 'Your request has been processed!',
+        message: `
+        <p>
+          Hi ${user.name},
+        </p>
+        <p>
+          Your request has been processed successfully.
+        </p>
+        <p>
+          Here is the generated content:
+        </p>
+        <p>
+          ${content}
+        </p>
+        `,
+      });
 
       return artifact;
     } catch (e) {

@@ -8,5 +8,6 @@ import { WaitlistModule } from '@/waitlist/waitlist.module';
   imports: [WaitlistModule, MailerModule],
   controllers: [UserController],
   providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule {}
