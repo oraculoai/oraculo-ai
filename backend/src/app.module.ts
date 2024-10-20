@@ -9,6 +9,7 @@ import { UserModule } from '@/user/user.module';
 import { RequestModule } from '@/request/request.module';
 import { WaitlistModule } from '@/waitlist/waitlist.module';
 import { MailerModule } from './mailer/mailer.module';
+import { YoutubeModule } from './youtube/youtube.module';
 
 @Module({
   imports: [
@@ -34,6 +35,8 @@ import { MailerModule } from './mailer/mailer.module';
 
     // Config
     ConfigModule.forRoot(),
+
+    YoutubeModule,
   ],
   controllers: [AppController],
 })

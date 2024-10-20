@@ -48,7 +48,8 @@
     "mailgun.js": "^10.2.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
