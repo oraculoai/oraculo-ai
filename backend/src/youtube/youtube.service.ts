@@ -12,7 +12,7 @@ export class YoutubeService {
    * @param {string} videoIdOrUrl - The ID or URL of the YouTube video.
    * @returns {Promise<TranscriptResponse[]>} The transcript of the YouTube video.
    */
-  getVideoTranscript(videoIdOrUrl: string): Promise<TranscriptResponse[]> {
+  fetchVideoTranscript(videoIdOrUrl: string): Promise<TranscriptResponse[]> {
     try {
       if (videoIdOrUrl.startsWith('https://www.youtube.com/live/')) {
         videoIdOrUrl = videoIdOrUrl.replace(
