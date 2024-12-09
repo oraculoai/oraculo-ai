@@ -18,13 +18,21 @@ export class LandingPageController {
     const path = req.originalUrl.replace(LANDING_PAGE_PATH, '');
 
     const acceptLanguageHeader = req.headers['accept-language'];
-    const isPtBrPreferred = prefersLanguage(acceptLanguageHeader, 'pt-br');
-    const isEnPreferred = prefersLanguage(acceptLanguageHeader, 'en');
+    const isPtBrPreferred =
+      prefersLanguage(acceptLanguageHeader, 'pt') ||
+      prefersLanguage(acceptLanguageHeader, 'pt-br');
+    const isEnPreferred =
+      prefersLanguage(acceptLanguageHeader, 'en') ||
+      prefersLanguage(acceptLanguageHeader, 'en-us');
 
-    if (isPtBrPreferred && path === '') {
-      return res.redirect(301, '/pt-br');
-    } else if (isEnPreferred && path === '/pt-br') {
-      return res.redirect(301, '/');
+    if (isPtBrPreferred) {
+      if (path === '') {
+        return res.redirect(301, '/pt-br');
+      }
+    } else if (isEnPreferred) {
+      if (path === '/pt-br') {
+        return res.redirect(301, '/');
+      }
     }
 
     return res.send(await this.landingPageService.fetchContent(path));
